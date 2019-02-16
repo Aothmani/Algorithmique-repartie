@@ -1,0 +1,24 @@
+* TME 2 AR
+
+** Question 1
+
+- Envoi d'un message pour demander la baguette. Si réponse, ressouce prise.
+- Ressource personnelle à donner
+- Celui de gauche sera en attente
+
+** Question 2
+
+- Interblocage
+
+** Question 3
+
+- Un processus se termine ssi son voisin n'a plus besoin de lui (càd il a atteint son nombre de meal)
+
+** Question 4
+
+Variables : NB_MEALS (const int), cpt_meals (int), etat (int)
+
+1.Initialisation
+- etat THINKING, set NB_MEALS
+
+2.Réception d'un message de demande de ressource
