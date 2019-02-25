@@ -1,0 +1,19 @@
+#include <mpi.h>
+
+/* mesage type */
+#define REQ 1
+#define REPLY 2
+
+/* state */
+#define ASKING 1
+#define IDLE 2
+#define CS 3
+
+/* var */
+int nb_reply = 0;
+int date_req = 0;
+int horloge = 0;
+
+void request_CS()
+{
+  horloge++;  
