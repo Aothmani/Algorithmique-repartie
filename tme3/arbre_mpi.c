@@ -2,41 +2,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TAGINIT    0
+#define TAGINIT 0
+#define TAGCALC 1
 #define NB_SITE 6
 
-void calcul_min(rang)
+void calcul_min(int rang)
 {
-	int i, nb_voisins, min_local, status;
-	int *voisins;
-	int stop = 0;
-    
+	int i, j, nb_voisins, min_local, buf;
+	MPI_Status status;
+	int found = 0;
+	buf = 0;
+	
 	MPI_Recv(&nb_voisins, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
-	MPI_Recv(&voisins, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
-	MPI_Recv(&min_local, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
 
+	int voisins[nb_voisins];
+	MPI_Recv(&voisins, nb_voisins, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
+	MPI_Recv(&min_local, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
+	
 	int voisins_recus[nb_voisins-1];
-  
+
 	if(nb_voisins == 1){
 		MPI_Send(&min_local, 1, MPI_INT, voisins[0], TAGCALC, MPI_COMM_WORLD);
 	} else {
-		int tmp;
-		for(i=0; i<nb_voisins-1; i++){
-			MPI_Recv(tmp, 1, MPI_INT, MPI_ANY_SOURCE, TAGCALC, MPI_COMM_WORLD, &status);
+			for(i=0; i<nb_voisins-1; i++){
+			MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, TAGCALC, MPI_COMM_WORLD, &status);
 			voisins_recus[i] = status.MPI_SOURCE;
-			if(tmp < min_local)
-				min_local = tmp;
+			if(buf < min_local)
+				min_local = buf;
 		}
 
-		i=0;
-		while(!stop || i<nb_voisins-1){
-			/* TODO !!!!!!!!!!!!! */
-			if(){
-
+		/* recherche du voisin a qui envoyer le message (celui qui n'est pas dans le tableau) */
+		for(i = 0; i < nb_voisins; i++){
+			for(j = 0; j < nb_voisins; j++){
+				if(voisins[i] == voisins_recus[j])
+					found = 1;
 			}
-    
-			MPI_Send(&min_local, 1, MPI_INT, , TAGCALC, MPI_COMM_WORLD);
+			if(!found){
+				found = voisins[i];
+				break;
+			}
+			found = 0;
 		}
+		MPI_Send(&min_local, 1, MPI_INT, found, TAGCALC, MPI_COMM_WORLD);
+	}
+	/* si reception, alors decideur */
+	MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, TAGCALC, MPI_COMM_WORLD, &status);
+	if(buf < min_local)
+		min_local = buf;
+	if(rang < status.MPI_SOURCE){
+		printf("Les processus %d et %d ont decide : le minimum est %d\n", rang, status.MPI_SOURCE, min_local);
 	}
 }
 
@@ -56,7 +70,7 @@ void simulateur(void)
                                
 	for(i=1; i<=NB_SITE; i++){
 		MPI_Send(&nb_voisins[i], 1, MPI_INT, i, TAGINIT, MPI_COMM_WORLD);    
-		MPI_Send(voisins[i],nb_voisins[i], MPI_INT, i, TAGINIT, MPI_COMM_WORLD);
+		MPI_Send(voisins[i], nb_voisins[i], MPI_INT, i, TAGINIT, MPI_COMM_WORLD);
 		MPI_Send(&min_local[i], 1, MPI_INT, i, TAGINIT, MPI_COMM_WORLD); 
 	}
 }
