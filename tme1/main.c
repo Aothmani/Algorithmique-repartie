@@ -15,7 +15,6 @@ void attenton(int tag, int source){
 }
 
 int main( int argc, char** argv){
-  printf("totototototototototo");
   int rank;
   int size;
   MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, NULL);
@@ -24,7 +23,7 @@ int main( int argc, char** argv){
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   start_server(attenton);
   
-  sprintf(buf, "Hello %d from %d\0", (rank+1)%size, rank);
+  sprintf(buf, "Hello %d from %d", (rank+1)%size, rank);
    
   MPI_Send(buf,20, MPI_CHAR, (rank+1)%size, 0,MPI_COMM_WORLD);
   pthread_mutex_lock(&mutex);

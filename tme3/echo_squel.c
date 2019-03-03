@@ -79,10 +79,11 @@ void simulateur(void) {
 /******************************************************************************/
 
 int main (int argc, char* argv[]) {
-	printf("debut\n");
 	int nb_proc,rang;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &nb_proc);
+
+	printf("--+----debut\n");
 
 	if (nb_proc != NB_SITE+1) {
 		printf("Nombre de processus incorrect !\n");
@@ -93,9 +94,9 @@ int main (int argc, char* argv[]) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rang);
   
 	if (rang == 0) {
-//		simulateur();
+		simulateur();
 	} else {
-//		calcul_min(rang);
+		calcul_min(rang);
 	}
   
 	MPI_Finalize();
