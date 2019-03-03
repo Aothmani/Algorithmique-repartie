@@ -14,7 +14,8 @@ void calcul_min(int rang)
 	int recu = 0;
 	
 	MPI_Recv(&nb_voisins, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
-
+	printf("\n\n\ndlzpeadlpkzejdklzejozfjkzkl\n\n\n");
+	
 	int voisins[nb_voisins];
 	MPI_Recv(&voisins, nb_voisins, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
 	MPI_Recv(&min_local, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
@@ -24,7 +25,7 @@ void calcul_min(int rang)
 		pere = -1;
 		for(i = 1; i < nb_voisins; i++){
 			if(i != rang){
-				MPI_Send(&min_local, 1, MPI_INT, i, TAGINIT, MPI_COMM_WORLD);
+				MPI_Send(&min_local, 1, MPI_INT, i, TAGCALC, MPI_COMM_WORLD);
 			}
 		}
 		while(recu != nb_voisins){
@@ -82,8 +83,6 @@ int main (int argc, char* argv[]) {
 	int nb_proc,rang;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &nb_proc);
-
-	printf("--+----debut\n");
 
 	if (nb_proc != NB_SITE+1) {
 		printf("Nombre de processus incorrect !\n");
