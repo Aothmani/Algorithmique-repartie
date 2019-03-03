@@ -14,8 +14,7 @@ void calcul_min(int rang)
 	int recu = 0;
 	
 	MPI_Recv(&nb_voisins, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
-	printf("\n\n\ndlzpeadlpkzejdklzejozfjkzkl\n\n\n");
-	
+		
 	int voisins[nb_voisins];
 	MPI_Recv(&voisins, nb_voisins, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
 	MPI_Recv(&min_local, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
@@ -23,10 +22,8 @@ void calcul_min(int rang)
 	/* Initiateur */
 	if(rang == INITIATEUR){
 		pere = -1;
-		for(i = 1; i < nb_voisins; i++){
-			if(i != rang){
-				MPI_Send(&min_local, 1, MPI_INT, i, TAGCALC, MPI_COMM_WORLD);
-			}
+		for(i = 0; i < nb_voisins; i++){
+			MPI_Send(&min_local, 1, MPI_INT, voisins[i], TAGCALC, MPI_COMM_WORLD);
 		}
 		while(recu != nb_voisins){
 			MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, TAGCALC, MPI_COMM_WORLD, &status);
@@ -36,7 +33,7 @@ void calcul_min(int rang)
 		}
 		printf("Le minimum decide par le processus de rang %d est %d\n", rang, min_local);
 
-	/* Non initiateur */	
+		/* Non initiateur */	
 	} else {
 		MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, TAGCALC, MPI_COMM_WORLD, &status);
 		pere = status.MPI_SOURCE;
