@@ -1,0 +1,80 @@
+* TME5
+
+** Exercice 1
+   
+1) Le processus qui gagne l'élection est celui dont le message fait le tour. Il le sait lorsqu'il reçoit son propre message.
+
+Q. bonus : 
+
+*** pseudo-code :
+
+_Variables_
+
+id : id du noeud
+etat : ensemble des états {elu, initiateur, battu}
+leader : id du leader elu
+
+_Initialisation_:
+
+id = id du noeud
+etat : initiateur ou battu 
+
+
+receive(<emetteur, initiateur, tag>)
+    si (initiateur = id)
+        si(tag = tagask)
+            etat = elu
+            envoyer_VD(<emetteur, leader, tagelu>)
+    sinon
+        si(tag = tagelu)
+	    leader = emetteur
+            envoyer_VD(<emetteur, initiateur, tagelu>)
+        si (initiateur = false)
+            envoyer_VD(<id, initiateur, tagask>)
+        sinon
+            si (initiateur > id)
+                etat = battu
+                envoyer_VD(<id, initiateur, tagask>)
+
+*** complexité
+
+Pire cas : tout le monde est initiateur, et l'anneau est dans l'ordre. Chaque proc envoie 1 message (donc N messages en tout), puis N-1 messages, N-2..
+L'ordre de grandeur est donc o(N²)
+
+
+** Exercice 2
+
+Réveil -> 2 * nb_arretes messages dans le pire des cas
+élection -> n messages
+annonce -> m-1 messages
+
+Une fois le leader choisi, les 2 noeuds décideurs propage la nouvelle dans l'autre sens
+
+Dans le cas où une feuille est initiatrice, il est inutile d'envoyer un message de réveil. Le noeud va immédiatement envoyer un message avec l'information, autant en envoyer un seul.
+
+
+*** pseudo-code
+
+_Variables_:
+
+id : id du noeud
+etat : etat du noeud parmi {elu, initiateur, battu}
+nb_voisins : nombre de vosisins du noeud
+
+_Initialisation_
+
+id = id du noeud
+etat = iniateur ou battu
+nb_voisins = nombre de voisins
+
+si (etat = initiateur)
+    envoyer(<id, initiateur, TAGREVEIL>)
+
+recevoir(<emetteur, initiateur, tag>)
+    si( tag = TAGREVEIL)
+        si( etat = battu )
+	    si (nb_voisins > 1)
+                pour (tous les voisins différents de emetteur)
+	            envoyer(<id, TAGREVEIL>)
+	    sinon 
+	        TODO : ident
