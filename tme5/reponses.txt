@@ -55,28 +55,4 @@ Dans le cas où une feuille est initiatrice, il est inutile d'envoyer un message
 Le noeud va immédiatement envoyer un message avec l'information, autant en envoyer un seul.
 
 
-*** pseudo-code
 
-_Variables_:
-
-id : id du noeud
-etat : etat du noeud parmi {elu, initiateur, battu}
-nb_voisins : nombre de vosisins du noeud
-
-_Initialisation_
-
-id = id du noeud
-etat = iniateur ou battu
-nb_voisins = nombre de voisins
-
-si (etat = initiateur)
-    envoyer(<id, initiateur, TAGREVEIL>)
-
-recevoir(<emetteur, initiateur, tag>)
-    si( tag = TAGREVEIL)
-        si( etat = battu )
-	    si (nb_voisins > 1)
-                pour (tous les voisins différents de emetteur)
-	            envoyer(<id, TAGREVEIL>)
-	    sinon 
-	        TODO : ident
