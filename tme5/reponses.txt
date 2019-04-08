@@ -1,5 +1,5 @@
 * TME5
-
+  
 ** Exercice 1
    
 1) Le processus qui gagne l'élection est celui dont le message fait le tour. Il le sait lorsqu'il reçoit son propre message.
@@ -17,19 +17,20 @@ leader : id du leader elu
 _Initialisation_:
 
 id = id du noeud
-etat : initiateur ou battu 
+etat : initiateur, battu ou elu 
 
+si initiateur : envoyer_VD(<id, tagask>)
 
-receive(<emetteur, initiateur, tag>)
+receive(<initiateur, tag>)
     si (initiateur = id)
         si(tag = tagask)
             etat = elu
-            envoyer_VD(<emetteur, leader, tagelu>)
+            envoyer_VD(<id, tagelu>)
     sinon
         si(tag = tagelu)
-	    leader = emetteur
+	    leader = initiateur
             envoyer_VD(<emetteur, initiateur, tagelu>)
-        si (initiateur = false)
+        sinon si (initiateur = false)
             envoyer_VD(<id, initiateur, tagask>)
         sinon
             si (initiateur > id)
@@ -48,33 +49,10 @@ Réveil -> 2 * nb_arretes messages dans le pire des cas
 élection -> n messages
 annonce -> m-1 messages
 
-Une fois le leader choisi, les 2 noeuds décideurs propage la nouvelle dans l'autre sens
+Une fois le leader choisi, les 2 noeuds décideurs propagent la nouvelle dans l'autre sens
 
-Dans le cas où une feuille est initiatrice, il est inutile d'envoyer un message de réveil. Le noeud va immédiatement envoyer un message avec l'information, autant en envoyer un seul.
+Dans le cas où une feuille est initiatrice, il est inutile d'envoyer un message de réveil. 
+Le noeud va immédiatement envoyer un message avec l'information, autant en envoyer un seul.
 
 
-*** pseudo-code
 
-_Variables_:
-
-id : id du noeud
-etat : etat du noeud parmi {elu, initiateur, battu}
-nb_voisins : nombre de vosisins du noeud
-
-_Initialisation_
-
-id = id du noeud
-etat = iniateur ou battu
-nb_voisins = nombre de voisins
-
-si (etat = initiateur)
-    envoyer(<id, initiateur, TAGREVEIL>)
-
-recevoir(<emetteur, initiateur, tag>)
-    si( tag = TAGREVEIL)
-        si( etat = battu )
-	    si (nb_voisins > 1)
-                pour (tous les voisins différents de emetteur)
-	            envoyer(<id, TAGREVEIL>)
-	    sinon 
-	        TODO : ident

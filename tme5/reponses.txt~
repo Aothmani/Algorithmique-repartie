@@ -1,5 +1,0 @@
-* TME5
-
-** Exercice 1
-
-1) Le processus qui gagne l'élection est celui dont le message fait le tour. Il le sait lorsqu'il reçoit son propre message.
