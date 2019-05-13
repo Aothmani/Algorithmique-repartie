@@ -1,4 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <mpi.h>
+#include <string.h>
+
 #define TAGINIT 0
+#define TAGSEND 1
 #define NB_SITE 6
 #define DIAMETRE 4
 #define DEG_IN_MAX 2 /* le max des degres entrants des noeuds */
@@ -8,29 +15,77 @@
 void calcul_min(int rang)
 {
 	int initiateur = 0, nb_voisins_in, nb_voisins_out, min_local, i, scount = 0, rcount = 0;
+	int id, buf = 0, send = 0, decision = 0;
 	MPI_Status status;
 
 	
 	MPI_Recv(&nb_voisins_in, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
 	MPI_Recv(&nb_voisins_out, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
 
-	int voisins_in[nb_voisins_in], voisins_out[nb_voisins_out];
+	int voisins_in[nb_voisins_in], voisins_out[nb_voisins_out], voisins_rcount[nb_voisins_in];
+	memset(voisins_rcount, 0, sizeof(int) * nb_voisins_in);
 
 	MPI_Recv(&voisins_in, nb_voisins_in, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
 	MPI_Recv(&voisins_out, nb_voisins_out, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
 	MPI_Recv(&min_local, 1, MPI_INT, 0, TAGINIT, MPI_COMM_WORLD, &status);
 
-	// TODO : random initiateur
+	srand(getpid());
+	initiateur = rand() % 2;
 	
 	if(initiateur){
-		for(i = 0; i < nb_voisins_out, i++){
-			MPI_Send(&min_local, 1, MPI_INT, voisins_out[i], TAG_SEND, MPI_COMM_WORLD, &status);
+		for(i = 0; i < nb_voisins_out; i++){
+			MPI_Send(&min_local, 1, MPI_INT, voisins_out[i], TAGSEND, MPI_COMM_WORLD);
 		}
 		scount++;
+		printf("p%d> INIT : envoi du %d eme message\n", rang, scount);
 	}
 
-	
-	
+	while(!decision){
+		MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, TAGSEND, MPI_COMM_WORLD, &status);
+			
+		id = status.MPI_SOURCE;
+
+		if(buf < min_local)
+			min_local = buf;
+		
+		/* Incrementation du compteur de réception du voisin qui a envoye le message */
+		for (i = 0; i < nb_voisins_in; i++){
+			if (voisins_in[i] == id){
+				voisins_rcount[i]++;
+				printf("p%d> %d eme message recu de %d\n", rang, voisins_rcount[i], id);
+			}
+			
+		}
+
+		/* On verifie si les conditions d'envoi d'un message sont verifiees */
+		if (scount < DIAMETRE){
+			send = 1;
+			for (i = 0; i < nb_voisins_in; i++){
+				if (voisins_rcount[i] < scount){
+					send = 0;
+				}
+			}
+			if (send){
+				for (i = 0; i < nb_voisins_out; i++){
+					MPI_Send(&min_local, 1, MPI_INT, voisins_out[i], TAGSEND, MPI_COMM_WORLD);
+				}
+				scount++;
+				printf("p%d> envoi du %d eme message avec min_local = %d\n", rang, scount, min_local);
+			}			
+		}
+
+		/* On verifie si les conditions de decision sont verifiees */
+		decision = 1;
+		//	printf("Node %d : verification de decision\n", rang);
+		for (i = 0; i < nb_voisins_in; i++){
+			if(voisins_rcount[i] < DIAMETRE) {
+				decision = 0;
+				//	printf("Node %d : verification ratee\n", rang);
+				break;
+			}
+		}
+	}
+	printf("\np%d> decision prise, le minimum est %d\n\n", rang, min_local);
 }
 
 void simulateur(void)
